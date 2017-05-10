@@ -1,0 +1,214 @@
+
+	<Page ux:Class="Card">
+  <string ux:Property="temp" />
+  <string ux:Property="speed" />
+  <string ux:Property="description" />
+  <string ux:Property="cityname" />
+  <string ux:Property="humidity" />
+  <string ux:Property="graphicStyle" />
+  <string ux:Property="temp_min"/>
+  <string ux:Property="temp_max"/>
+  <Router ux:Dependency="router" />
+ 
+
+  <JavaScript>
+  var Observable = require("FuseJS/Observable");
+  var searchInput = Observable('');
+  var cityName = this.cityname;
+
+  var apiKey = "e40a432f8ac6e7f5f19cb5d25f67a2d5";
+
+    cityName.onValueChanged( (newValue) => {
+      console.log("City changed to: " + newValue + ' -- ' + cityName.value);
+
+      var apiCity = newValue.replace(' ', '%20');
+      console.log('API will call with: ' + apiCity);
+
+      fetch('http://api.openweathermap.org/data/2.5/weather?q=' + apiCity + '&APPID=' + apiKey + '&units=metric', {
+        method: 'GET',
+        headers: { "Content-type": "application/json"}
+      }).then(function(response) {
+          status = response.status;  // Get the HTTP status code
+          response_ok = response.ok; // Is response.status in the 200-range?
+          return response.json();    // This returns a promise
+      }).then( (responseObject) => {
+
+        console.log(JSON.stringify(responseObject));
+
+        var temp = Math.round(responseObject.main.temp);
+        var speed = responseObject.wind.speed;
+        var description = responseObject.weather[0].description;
+        var humidity = responseObject.main.humidity;
+        var temp_min = responseObject.main.temp_min;
+        var temp_max = responseObject.main.temp_max;
+
+        this.temp.value = temp;
+        this.speed.value = speed;
+        this.description.value = description;
+        this.humidity.value = humidity;
+        this.temp_min.value = temp_min;
+        this.temp_max.value = temp_max;
+
+       if(temp > 35) {
+         this.graphicStyle.value = "very-hot";
+       } else if(temp > 25) {
+          this.graphicStyle.value = "hot";
+         } else if(temp > 10){
+          this.graphicStyle.value = "warm";
+         } else if(temp > 0){
+          this.graphicStyle.value = "cold";
+         } else {
+            this.graphicStyle.value = "snow";
+         };
+         
+
+      
+      }).catch(function(err) {
+          // An error occurred somewhere in the Promise chain
+          console.log("Fetch received error: " + JSON.stringify(err));
+      });   
+
+      
+
+    });
+//    fetch()
+
+// function goToAddCity(){
+//   router.goto("add");
+// }
+
+// module.exports = {
+//   goToAddCity = goToAddCity
+// };
+
+function gotoAddCity(){
+  router.push("add");
+}
+
+function showCity() {
+  console.log('Showing city...' + this.cityname);
+  cityName.value = searchInput.value;
+}
+
+module.exports = {
+  gotoAddCity: gotoAddCity,
+  searchInput:searchInput,
+  showCity:showCity
+};
+  </JavaScript>
+
+
+
+  
+   <StackPanel>
+    <Panel>
+       <!-- <Image File="../Assets/plus.png" Width="20" Alignment="TopRight" Margin="0,10,10,0" Clicked="{gotoAddCity}"/> -->
+       <!-- <TextInput Alignment="Top" Background="#dee0e2" PlaceholderText="Search" Width="80%" /> -->
+       <TextBox Alignment="Top" Background="#dee0e2" PlaceholderText="Search" Width="80%" Margin="0,10,0,0" PlaceholderColor="#c4c6c6" ActionStyle="Go" Value="{searchInput}">
+        <TextInputActionTriggered>
+          <Callback Handler="{showCity}" />
+        </TextInputActionTriggered>
+       </TextBox>
+      <StackPanel Margin="0,100,0,0">
+
+        <Text Font="RobotoMedium" FontSize="28" Value="{Property cityname}" Alignment="Center" Color="#000" />
+        <Text Font="RobotoMedium" FontSize="68" Value="{Property temp}"  Alignment="Center"  Color="#fff" Margin="0,20,0,100"/>
+       
+     
+      </StackPanel>
+      <Match Value="{Property graphicStyle}">
+        <Case String="very-hot">
+          <Image File="../Assets/very-hot.JPG" Layer="Background" StretchMode="UniformToFill" />
+        </Case>
+
+        <Case String="hot">
+          <Image File="../Assets/hot.JPG" Layer="Background" StretchMode="UniformToFill" />
+        </Case>
+
+        <Case String="warm">
+          <Image File="../Assets/warm.JPG" Layer="Background" StretchMode="UniformToFill" />
+        </Case>
+
+        <Case String="cold">
+          <Image File="../Assets/cold.JPG" Layer="Background" StretchMode="UniformToFill" />
+        </Case>
+
+        <Case String="snow">
+          <Image File="../Assets/snow.JPG" Layer="Background" StretchMode="UniformToFill" />
+        </Case>
+      </Match>
+    </Panel>
+
+    <Panel Margin="0,20,0,20">
+        <StackPanel>
+        <Grid ColumnCount="3" RowCount="1" Color="#fff ">
+          <Image ux:Class="StatIcon" Alignment="Center" Margin="6" Width="15"/>
+          <StatIcon File="../Assets/FlagIcon.png" />
+          <StatIcon File="../Assets/CompassIcon.png" />
+          <StatIcon File="../Assets/humidity.png" />
+
+          </Grid>
+
+          <Grid ColumnCount="3" RowCount="1">
+         <Text ux:Class="StatText" Color="#000" FontSize="14" Alignment="Center" />
+              <StatText Value= "{Property speed}" />
+              <StatText Value="{Property description}" />
+              <StatText Value="{Property humidity}" />
+          </Grid>
+        </StackPanel>
+        
+    </Panel>
+
+    <Panel Background="#fff" Alignment="VerticalCenter" Margin="0,50,0,0">
+      <Rectangle Width="1" Height="50" Color="#000"/>
+          <Grid RowCount="1" ColumnCount="2">
+
+              <Text Value="Min Temp" Alignment="Center" FontSize="20" />
+             
+               <Text Value="Max Temp" Alignment="Center" FontSize="20"/>
+
+               <Text Value="{Property temp_min}" Alignment="Center" FontSize="20" />
+               <Text Value="{Property temp_max}" Alignment="Center" FontSize="20" />
+                    
+                
+             
+                    
+                 </Grid>
+        </Panel>
+        
+  </StackPanel>
+
+
+</Page>
+
+
+
+
+ <!-- <Panel Color="#f3f3f3">
+          <Grid RowCount="4" ColumnCount="5">
+                    <Rectangle Alignment="Top" Height="1" Layer="Background" />
+                    <Text ux:Class="Weekday" Color="#939393" Alignment="Center" FontSize="12" />
+                    <Text ux:Class="Temperature" Color="#333333" Alignment="Center" FontSize="20" Margin="6,0,0,0" />
+                      <Weekday>MON</Weekday>
+                      <Weekday>TUE</Weekday>
+                      <Weekday>WED</Weekday>
+                      <Weekday>THU</Weekday>
+                      <Weekday>FRI</Weekday>
+                       <Image File="../Assets/CloudsIcon.png"  Width="50%"/>
+                      <Image File="../Assets/SunnyIcon.png"  Width="50%" />
+                      <Image File="../Assets/PartlyCloudyIcon.png"  Width="50%" />
+                      <Image File="../Assets/PartlyCloudyIcon.png"  Width="50%" />
+                      <Image File="../Assets/SunnyIcon.png"   Width="50%"/>  
+                      <Temperature>33°</Temperature>
+                      <Temperature>25°</Temperature>
+                      <Temperature>31°</Temperature>
+                      <Temperature>32°</Temperature>
+                      <Temperature>36°</Temperature>
+                 </Grid>
+        </Panel> -->
+        
+<!--       
+<LinearGradient StartPoint="1,0" EndPoint="0,2">
+        <GradientStop Offset="0" Color="{Property ThemeColor}" />
+        <GradientStop Offset="1" Color="#fff" />
+      </LinearGradient> -->

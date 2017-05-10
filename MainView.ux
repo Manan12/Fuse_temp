@@ -1,0 +1,37 @@
+<App>
+<Router ux:Name="router" />
+  
+	<JavaScript>
+	var Observable = require('FuseJS/Observable');
+	var cityName = Observable('Ahmedabad');
+
+
+
+	module.exports = {
+		cityName : cityName
+	}
+
+	</JavaScript>
+
+
+	<Android.StatusBarConfig Color="#0003" IsVisible="True" />
+	<StatusBarBackground Dock="Top" />
+		<BottomBarBackground Dock="Bottom"/>
+	<Font ux:Global="RobotoBold" File="assets/Roboto-Bold.ttf" />
+	<Font ux:Global="RobotoMedium" File="assets/Roboto-Medium.ttf" />
+	
+		<!-- <PageControl> -->
+		
+	<!-- 	<Each Items="{cityName}"> -->
+				<!-- <Panel> -->
+          <Navigator DefaultPath="city">
+						<Card router="router" ux:Template="city" cityname="AHMEDABAD"/>
+            <addCity router="router" ux:Template="add"/>
+          </Navigator>
+				<!-- </Panel> -->
+	<!-- 	</Each> -->
+		<!-- 	</PageControl> -->
+			
+
+
+</App>
